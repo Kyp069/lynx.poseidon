@@ -36,10 +36,10 @@ module psd
 );
 //--- clock ---------------------------------------------------------------------------------------
 
-	wire clock, clock96;
+	wire clock;
 	wire power;
 
-	pll48 pll48(clock50, clock, clock96, power);
+	pll48 pll48(clock50, clock, power);
 
 	reg[5:0] ce6;
 	always @(negedge clock, negedge power) if(!power) ce6 <= 1'd0; else ce6 <= ce6+1'd1;
@@ -83,7 +83,6 @@ module psd
 	wire[ 7:0] dioD;
 	wire       dioW;
 
-	wire       ready;
 	wire[63:0] status;
 
 	mist mist
@@ -117,7 +116,6 @@ module psd
 		.dioA   (dioA   ),
 		.dioD   (dioD   ),
 		.dioW   (dioW   ),
-		.ready  (ready  ),
 		.status (status ),
 		.spiCk  (spiCk  ),
 		.spiSs1 (spiSs1 ),
@@ -141,12 +139,12 @@ module psd
 //--- memory --------------------------------------------------------------------------------------
 
 	wire[15:0] mem0A;
-	wire[ 7:0] mem0Q; // sdrQ[7:0];
+	wire[ 7:0] mem0Q = sdrQ[7:0];
 	wire       mem0R;
 
 	wire[15:0] mem1A;
 	wire[ 7:0] mem1D;
-	wire[ 7:0] mem1Q; // = sdrQ[7:0];
+	wire[ 7:0] mem1Q = sdrQ[7:0];
 	wire       mem1R;
 	wire       mem1W;
 
@@ -179,11 +177,11 @@ module psd
 			default:    romP = 3'd7;
 		endcase
 
-	wire[7:0] romQ;
-	romm #(56, "../rom/lynx.mif") mem0(clock, { romP, mem0A[12:0] }, mem0Q);
+	// wire[7:0] romQ;
+	// romm #(56, "../rom/lynx.mif") mem0(clock, { romP, mem0A[12:0] }, mem0Q);
 
-	wire[7:0] ramQ;
-	ram #(64) mem1(clock, mem1A, mem1D, mem1Q, mem1W);
+	// wire[7:0] ramQ;
+	// ram #(64) mem1(clock, mem1A, mem1D, mem1Q, mem1W);
 
 	dprf #(16) mem2
 	(
@@ -213,9 +211,7 @@ module psd
 		.w2     (mem3W2 )
 	);
 
-	// reg sdrR;
-	// always @(posedge clock) if(pe04M) sdrR <= mem0R || mem1R;
-
+	wire       ready;
 	wire[23:0] sdrA  = { 7'd0, romIo ? { 1'b0, dioA[15:0] } : mem0R ? { 1'b0, romP, mem0A[12:0]} : { 1'b1, mem1A } };
 	wire[15:0] sdrD =  { 8'hFF, romIo ? dioD : mem1D };
 	wire[15:0] sdrQ;
@@ -224,8 +220,8 @@ module psd
 
 	sdram sdram
 	(
-		.clock  (clock96),
-		.ready  (       ),
+		.clock  (clock  ),
+		.ready  (ready  ),
 		.reset  (power  ),
 		.rfsh   (rfsh   ),
 		.a      (sdrA   ),
@@ -244,7 +240,7 @@ module psd
 		.dramA  (dramA  )
 	);
 
-	assign dramCk = clock96;
+	assign dramCk = clock;
 
 //--- keyboard ------------------------------------------------------------------------------------
 
@@ -261,7 +257,7 @@ module psd
 
 //--- tzx -----------------------------------------------------------------------------------------
 
-	localparam TK = 360;
+	localparam TK = 512;
 	localparam TW = $clog2(TK*1024);
 
 	reg[TW-1:0] tzxSize;

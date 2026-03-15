@@ -38,7 +38,6 @@ module mist
 	output wire[ 7:0] dioD,
 	output wire       dioW,
 
-    output wire       ready,
 	output wire[63:0] status,
 
 	input  wire       spiCk,
@@ -295,25 +294,22 @@ module mist
 
 //-------------------------------------------------------------------------------------------------
 
-	reg[1:0] status21;
-	always @(posedge clock) status21 <= status[2:1];
+	// reg[1:0] status21;
+	// always @(posedge clock) status21 <= status[2:1];
 
-	reg modelReady = 1'b1;
-	always @(posedge clock) modelReady<= status[2:1] == status21;
+	// reg modelReady = 1'b1;
+	// always @(posedge clock) modelReady<= status[2:1] == status21;
 
-	reg romIoPre = 0;
-	always @(posedge clock) romIoPre <= romIo;
-
-    reg romReady = 1'b0;
-	always @(posedge clock) if(!romReady && !romIo && romIoPre) romReady <= 1'b1;
+	// reg dio0p = 0;
+    // wire dio0 = dioDw && dioIx[5:0] == 0;
+	// always @(posedge clock) dio0p <= dio0;
+	// always @(posedge clock) if(dio0 && !dio0p) romIo <= 1'b0; else if(!dio0 && dio0p) romIo <= 1'b1;
 
 	assign joy0 = ~{ 2'b00, joystick_1[4], 1'b0, joystick_1[0], joystick_1[1], joystick_1[2], joystick_1[3] };
 	assign joy1 = ~{ 2'b00, joystick_0[4], 1'b0, joystick_0[0], joystick_0[1], joystick_0[2], joystick_0[3] };
 
     assign romIo = dioDw && dioIx[5:0] == 0;
     assign tzxIo = dioDw && dioIx[5:0] == 1;
-
-    assign ready = romReady && modelReady;
 
 //-------------------------------------------------------------------------------------------------
 endmodule
