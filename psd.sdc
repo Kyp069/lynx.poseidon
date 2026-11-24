@@ -7,7 +7,6 @@ create_clock -name clock50 -period 20.000 [get_ports clock50]
 set_clock_groups -asynchronous -group [get_clocks spiCk]
 set_clock_groups -asynchronous -group [get_clocks clock50]
 set_clock_groups -asynchronous -group [get_clocks pll48|altpll_component|auto_generated|pll1|clk[0]]
-set_clock_groups -asynchronous -group [get_clocks pll48|altpll_component|auto_generated|pll1|clk[1]]
 
 set_false_path -to   led*
 set_false_path -to   rgb*

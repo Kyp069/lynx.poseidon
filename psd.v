@@ -83,9 +83,10 @@ module psd
 	wire[ 7:0] dioD;
 	wire       dioW;
 
+	wire       ready;
 	wire[63:0] status;
 
-	mist mist
+	mist #(.RGBW(6)) mist
 	(
 		.clock  (clock  ),
 		.pe12M  (pe12M  ),
@@ -116,6 +117,7 @@ module psd
 		.dioA   (dioA   ),
 		.dioD   (dioD   ),
 		.dioW   (dioW   ),
+		.ready  (ready  ),
 		.status (status ),
 		.spiCk  (spiCk  ),
 		.spiSs1 (spiSs1 ),
@@ -211,7 +213,6 @@ module psd
 		.w2     (mem3W2 )
 	);
 
-	wire       ready;
 	wire[23:0] sdrA  = { 7'd0, romIo ? { 1'b0, dioA[15:0] } : mem0R ? { 1'b0, romP, mem0A[12:0]} : { 1'b1, mem1A } };
 	wire[15:0] sdrD =  { 8'hFF, romIo ? dioD : mem1D };
 	wire[15:0] sdrQ;
@@ -221,7 +222,7 @@ module psd
 	sdram sdram
 	(
 		.clock  (clock  ),
-		.ready  (ready  ),
+		.ready  (       ),
 		.reset  (power  ),
 		.rfsh   (rfsh   ),
 		.a      (sdrA   ),
@@ -242,7 +243,7 @@ module psd
 
 	assign dramCk = clock;
 
-//--- keyboard ------------------------------------------------------------------------------------
+//--- matrix --------------------------------------------------------------------------------------
 
 	wire      strb;
 	wire[7:0] code;
@@ -251,9 +252,9 @@ module psd
 
 	wire[3:0] row;
 	wire[7:0] col;
-	wire F9, play, stop;
+	wire F9, play, stop, break;
 
-	matrix matrix(clock, strb, code, row, col, F9, play, stop);
+	matrix matrix(clock, strb, code, row, col, F9, play, stop, break);
 
 //--- tzx -----------------------------------------------------------------------------------------
 
@@ -302,15 +303,18 @@ module psd
 		.pe04M  (pe04M  ),
 		.reset  (reset  ),
 		.rfsh   (rfsh   ),
-		.hSync  (hsync  ),
-		.vSync  (vsync  ),
 		.r      (r      ),
 		.g      (g      ),
 		.b      (b      ),
-		.tape   (tape   ),
+		.blank  (       ),
+		.hSync  (hsync  ),
+		.vSync  (vsync  ),
 		.sound  (sound  ),
+		.tape   (tape   ),
+		.motor  (       ),
 		.row    (row    ),
 		.col    (col    ),
+		.break  (break  ),
 		.joy0   (joy0   ),
 		.joy1   (joy1   ),
 		.mem0A  (mem0A  ),
